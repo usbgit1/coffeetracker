@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+:root {
+  --color-cream: #faf3e9;
+  --color-cream-dark: #f0e2cd;
+  --color-latte: #d9bd9a;
+  --color-caramel: #b5763b;
+  --color-coffee: #6b4226;
+  --color-coffee-dark: #4a2d19;
+  --color-espresso: #3b2314;
+  --color-gold: #c99a3c;
+
+  --background: var(--color-cream);
+  --foreground: var(--color-espresso);
+}
+
+@theme inline {
+  --color-cream: var(--color-cream);
+  --color-cream-dark: var(--color-cream-dark);
+  --color-latte: var(--color-latte);
+  --color-caramel: var(--color-caramel);
+  --color-coffee: var(--color-coffee);
+  --color-coffee-dark: var(--color-coffee-dark);
+  --color-espresso: var(--color-espresso);
+  --color-gold: var(--color-gold);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background: var(--color-latte);
+  color: var(--color-espresso);
+}
+
+@layer components {
+  .input {
+    @apply w-full rounded-lg border border-latte/60 bg-white px-3 py-2 text-espresso placeholder:text-coffee/40 focus:outline-none focus:ring-2 focus:ring-caramel/50 focus:border-caramel transition-colors;
+  }
+}

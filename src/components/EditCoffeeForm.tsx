@@ -120,7 +120,7 @@ export default function EditCoffeeForm({
           <button
             type="submit"
             disabled={pending}
-            className="bg-coffee-dark hover:bg-espresso disabled:opacity-60 text-cream text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+            className="bg-caramel hover:bg-coffee disabled:opacity-60 text-cream text-sm font-medium px-4 py-2 rounded-lg transition-colors"
           >
             {pending ? "Guardando…" : "Guardar cambios"}
           </button>

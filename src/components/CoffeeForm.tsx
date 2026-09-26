@@ -142,7 +142,7 @@ export default function CoffeeForm() {
         <button
           type="submit"
           disabled={pending}
-          className="w-full sm:w-auto bg-coffee-dark hover:bg-espresso disabled:opacity-60 text-cream font-medium px-6 py-2.5 rounded-lg transition-colors"
+          className="w-full sm:w-auto bg-caramel hover:bg-coffee disabled:opacity-60 text-cream font-medium px-6 py-2.5 rounded-lg transition-colors"
         >
           {pending ? "Guardando…" : "Guardar café"}
         </button>

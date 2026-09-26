@@ -40,17 +40,16 @@ export default function CoffeeForm() {
       </p>
 
       <form key={formKey} action={formAction} className="space-y-4">
-        <Field label="Nombre del café" required>
-          <input
-            name="nombre"
-            required
-            defaultValue={values?.nombre}
-            placeholder="Ej. Finca El Paraíso"
-            className="input"
-          />
-        </Field>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Field label="Nombre del café" required>
+            <input
+              name="nombre"
+              required
+              defaultValue={values?.nombre}
+              placeholder="Ej. Finca El Paraíso"
+              className="input"
+            />
+          </Field>
           <Field label="Tostador" required>
             <input
               name="tostador"
@@ -60,25 +59,26 @@ export default function CoffeeForm() {
               className="input"
             />
           </Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="País de origen" required>
-              <input
-                name="pais"
-                required
-                defaultValue={values?.pais}
-                placeholder="Ej. Colombia"
-                className="input"
-              />
-            </Field>
-            <Field label="Región">
-              <input
-                name="region"
-                defaultValue={values?.region}
-                placeholder="Ej. Huila"
-                className="input"
-              />
-            </Field>
-          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="País de origen" required>
+            <input
+              name="pais"
+              required
+              defaultValue={values?.pais}
+              placeholder="Ej. Colombia"
+              className="input"
+            />
+          </Field>
+          <Field label="Región">
+            <input
+              name="region"
+              defaultValue={values?.region}
+              placeholder="Ej. Huila"
+              className="input"
+            />
+          </Field>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

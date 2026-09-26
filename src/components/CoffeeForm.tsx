@@ -33,7 +33,8 @@ export default function CoffeeForm() {
         className="text-2xl text-coffee-dark mb-6"
         style={{ fontFamily: "var(--font-serif)" }}
       >
-        Registrar un nuevo café
+        Registrar un <span className="text-caramel">nuevo</span>{" "}
+        <span className="text-caramel">café</span>
       </h1>
 
       <form key={formKey} action={formAction} className="space-y-4">

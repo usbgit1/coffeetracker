@@ -30,14 +30,11 @@ export default function CoffeeForm() {
   return (
     <div className="bg-white/60 border border-latte/50 rounded-2xl p-6 sm:p-8 shadow-sm max-w-xl">
       <h1
-        className="text-2xl text-coffee-dark mb-1"
+        className="text-2xl text-coffee-dark mb-6"
         style={{ fontFamily: "var(--font-serif)" }}
       >
         Registrar un nuevo café
       </h1>
-      <p className="text-sm text-coffee/70 mb-6">
-        Anota los datos del café que acabas de comprar.
-      </p>
 
       <form key={formKey} action={formAction} className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

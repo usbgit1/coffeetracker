@@ -28,7 +28,7 @@ export default function CoffeeForm() {
   const values = state.values;
 
   return (
-    <div className="bg-white/60 border border-latte/50 rounded-2xl p-6 sm:p-8 shadow-sm max-w-xl">
+    <div>
       <h1
         className="text-2xl text-coffee-dark mb-6"
         style={{ fontFamily: "var(--font-serif)" }}
@@ -37,114 +37,116 @@ export default function CoffeeForm() {
         <span className="text-caramel">café</span>
       </h1>
 
-      <form key={formKey} action={formAction} className="space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Nombre del café" required>
-            <input
-              name="nombre"
-              required
-              defaultValue={values?.nombre}
-              placeholder="Ej. Finca El Paraíso"
-              className="input"
-            />
-          </Field>
-          <Field label="Tostador" required>
-            <input
-              name="tostador"
-              required
-              defaultValue={values?.tostador}
-              placeholder="Ej. Hola Coffee"
-              className="input"
-            />
-          </Field>
-        </div>
+      <div className="bg-white/60 border border-latte/50 rounded-2xl p-6 sm:p-8 shadow-sm max-w-xl">
+        <form key={formKey} action={formAction} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field label="Nombre del café" required>
+              <input
+                name="nombre"
+                required
+                defaultValue={values?.nombre}
+                placeholder="Ej. Finca El Paraíso"
+                className="input"
+              />
+            </Field>
+            <Field label="Tostador" required>
+              <input
+                name="tostador"
+                required
+                defaultValue={values?.tostador}
+                placeholder="Ej. Hola Coffee"
+                className="input"
+              />
+            </Field>
+          </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="País de origen" required>
-            <input
-              name="pais"
-              required
-              defaultValue={values?.pais}
-              placeholder="Ej. Colombia"
-              className="input"
-            />
-          </Field>
-          <Field label="Región">
-            <input
-              name="region"
-              defaultValue={values?.region}
-              placeholder="Ej. Huila"
-              className="input"
-            />
-          </Field>
-        </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="País de origen" required>
+              <input
+                name="pais"
+                required
+                defaultValue={values?.pais}
+                placeholder="Ej. Colombia"
+                className="input"
+              />
+            </Field>
+            <Field label="Región">
+              <input
+                name="region"
+                defaultValue={values?.region}
+                placeholder="Ej. Huila"
+                className="input"
+              />
+            </Field>
+          </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Varietal">
-            <input
-              name="varietal"
-              list="varietales"
-              defaultValue={values?.varietal}
-              placeholder="Ej. Caturra"
-              className="input"
-            />
-            <datalist id="varietales">
-              {VARIETALES_COMUNES.map((v) => (
-                <option key={v} value={v} />
-              ))}
-            </datalist>
-          </Field>
-          <Field label="Proceso">
-            <input
-              name="proceso"
-              list="procesos"
-              defaultValue={values?.proceso}
-              placeholder="Ej. Lavado"
-              className="input"
-            />
-            <datalist id="procesos">
-              {PROCESOS_COMUNES.map((p) => (
-                <option key={p} value={p} />
-              ))}
-            </datalist>
-          </Field>
-        </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field label="Varietal">
+              <input
+                name="varietal"
+                list="varietales"
+                defaultValue={values?.varietal}
+                placeholder="Ej. Caturra"
+                className="input"
+              />
+              <datalist id="varietales">
+                {VARIETALES_COMUNES.map((v) => (
+                  <option key={v} value={v} />
+                ))}
+              </datalist>
+            </Field>
+            <Field label="Proceso">
+              <input
+                name="proceso"
+                list="procesos"
+                defaultValue={values?.proceso}
+                placeholder="Ej. Lavado"
+                className="input"
+              />
+              <datalist id="procesos">
+                {PROCESOS_COMUNES.map((p) => (
+                  <option key={p} value={p} />
+                ))}
+              </datalist>
+            </Field>
+          </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
-          <Field label="Fecha de compra" required>
-            <input
-              type="date"
-              name="fecha"
-              required
-              defaultValue={values?.fecha || todayISO()}
-              className="input"
-            />
-          </Field>
-          <Field label="Puntuación">
-            <StarInput name="puntuacion" defaultValue={values?.puntuacion} />
-          </Field>
-        </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+            <Field label="Fecha de compra" required>
+              <input
+                type="date"
+                name="fecha"
+                required
+                defaultValue={values?.fecha || todayISO()}
+                className="input"
+              />
+            </Field>
+            <Field label="Puntuación">
+              <StarInput name="puntuacion" defaultValue={values?.puntuacion} />
+            </Field>
+          </div>
 
-        {state.message && (
-          <p
-            className={`text-sm rounded-md px-3 py-2 ${
-              state.success
-                ? "bg-green-100 text-green-800"
-                : "bg-red-100 text-red-700"
-            }`}
+          {state.message && (
+            <p
+              className={`text-sm rounded-md px-3 py-2 ${
+                state.success
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-700"
+              }`}
+            >
+              {state.message}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={pending}
+            className="w-full sm:w-auto bg-caramel hover:bg-coffee disabled:opacity-60 text-cream font-medium px-6 py-2.5 rounded-lg transition-colors"
           >
-            {state.message}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          disabled={pending}
-          className="w-full sm:w-auto bg-caramel hover:bg-coffee disabled:opacity-60 text-cream font-medium px-6 py-2.5 rounded-lg transition-colors"
-        >
-          {pending ? "Guardando…" : "Guardar café"}
-        </button>
-      </form>
+            {pending ? "Guardando…" : "Guardar café"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

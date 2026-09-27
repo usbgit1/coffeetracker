@@ -7,9 +7,80 @@ import { deleteCoffee } from "@/lib/actions";
 import { StarDisplay } from "@/components/StarRating";
 import EditCoffeeForm from "@/components/EditCoffeeForm";
 
+type SortOption =
+  | "fecha-desc"
+  | "fecha-asc"
+  | "nombre-asc"
+  | "nombre-desc"
+  | "tostador-asc"
+  | "tostador-desc"
+  | "pais-asc"
+  | "pais-desc"
+  | "puntuacion-desc"
+  | "puntuacion-asc";
+
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: "fecha-desc", label: "Fecha (más reciente primero)" },
+  { value: "fecha-asc", label: "Fecha (más antiguo primero)" },
+  { value: "nombre-asc", label: "Nombre (A-Z)" },
+  { value: "nombre-desc", label: "Nombre (Z-A)" },
+  { value: "tostador-asc", label: "Tostador (A-Z)" },
+  { value: "tostador-desc", label: "Tostador (Z-A)" },
+  { value: "pais-asc", label: "País (A-Z)" },
+  { value: "pais-desc", label: "País (Z-A)" },
+  { value: "puntuacion-desc", label: "Puntuación (mayor a menor)" },
+  { value: "puntuacion-asc", label: "Puntuación (menor a mayor)" },
+];
+
+function sortCoffees(coffees: Coffee[], sort: SortOption): Coffee[] {
+  const sorted = [...coffees];
+
+  function byPuntuacion(a: Coffee, b: Coffee, ascending: boolean) {
+    if (a.puntuacion === null) return 1;
+    if (b.puntuacion === null) return -1;
+    return ascending ? a.puntuacion - b.puntuacion : b.puntuacion - a.puntuacion;
+  }
+
+  switch (sort) {
+    case "fecha-desc":
+      sorted.sort((a, b) => b.fecha.localeCompare(a.fecha));
+      break;
+    case "fecha-asc":
+      sorted.sort((a, b) => a.fecha.localeCompare(b.fecha));
+      break;
+    case "nombre-asc":
+      sorted.sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
+      break;
+    case "nombre-desc":
+      sorted.sort((a, b) => b.nombre.localeCompare(a.nombre, "es"));
+      break;
+    case "tostador-asc":
+      sorted.sort((a, b) => a.tostador.localeCompare(b.tostador, "es"));
+      break;
+    case "tostador-desc":
+      sorted.sort((a, b) => b.tostador.localeCompare(a.tostador, "es"));
+      break;
+    case "pais-asc":
+      sorted.sort((a, b) => a.pais.localeCompare(b.pais, "es"));
+      break;
+    case "pais-desc":
+      sorted.sort((a, b) => b.pais.localeCompare(a.pais, "es"));
+      break;
+    case "puntuacion-desc":
+      sorted.sort((a, b) => byPuntuacion(a, b, false));
+      break;
+    case "puntuacion-asc":
+      sorted.sort((a, b) => byPuntuacion(a, b, true));
+      break;
+  }
+
+  return sorted;
+}
+
 export default function HistoricoList({ coffees }: { coffees: Coffee[] }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<SortOption>("fecha-desc");
   const [isPending, startTransition] = useTransition();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -23,6 +94,8 @@ export default function HistoricoList({ coffees }: { coffees: Coffee[] }) {
         .some((field) => field!.toLowerCase().includes(q))
     );
   }, [coffees, query]);
+
+  const sorted = useMemo(() => sortCoffees(filtered, sort), [filtered, sort]);
 
   function handleDelete(id: string, nombre: string) {
     if (!confirm(`¿Borrar "${nombre}" del histórico?`)) return;
@@ -49,19 +122,35 @@ export default function HistoricoList({ coffees }: { coffees: Coffee[] }) {
         >
           Histórico de cafés
         </h1>
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Buscar por nombre, tostador, país…"
-          className="input max-w-xs"
-        />
+        <div className="flex items-center gap-3 flex-wrap">
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar por nombre, tostador, país…"
+            className="input max-w-xs"
+          />
+          <label className="flex items-center gap-2 text-sm text-coffee-dark">
+            Ordenar por
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as SortOption)}
+              className="input py-1.5 text-sm w-auto"
+            >
+              {SORT_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {sorted.length === 0 ? (
         <EmptyState message="Ningún café coincide con tu búsqueda." />
       ) : (
         <ul className="space-y-3">
-          {filtered.map((c) =>
+          {sorted.map((c) =>
             editingId === c.id ? (
               <EditCoffeeForm
                 key={c.id}

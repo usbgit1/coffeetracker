@@ -15,7 +15,7 @@ export default function Navbar() {
 
   return (
     <header className="bg-espresso text-cream sticky top-0 z-10 shadow-md shadow-espresso/20">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
         <span
           className="flex items-center gap-2 text-xl tracking-wide"
           style={{ fontFamily: "var(--font-serif)" }}

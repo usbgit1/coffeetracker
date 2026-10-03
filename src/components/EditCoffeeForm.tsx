@@ -30,7 +30,7 @@ export default function EditCoffeeForm({
   }
 
   return (
-    <li className="bg-white/80 border border-caramel/50 rounded-xl px-5 py-4 shadow-sm">
+    <div className="bg-white/80 border-l-4 border-caramel px-5 py-4">
       <form action={handleSubmit} className="space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Nombre del café">
@@ -134,7 +134,7 @@ export default function EditCoffeeForm({
           </button>
         </div>
       </form>
-    </li>
+    </div>
   );
 }
 

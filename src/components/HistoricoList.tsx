@@ -7,95 +7,130 @@ import { deleteCoffee } from "@/lib/actions";
 import { StarDisplay } from "@/components/StarRating";
 import EditCoffeeForm from "@/components/EditCoffeeForm";
 
-type SortOption =
-  | "fecha-desc"
-  | "fecha-asc"
-  | "nombre-asc"
-  | "nombre-desc"
-  | "tostador-asc"
-  | "tostador-desc"
-  | "pais-asc"
-  | "pais-desc"
-  | "puntuacion-desc"
-  | "puntuacion-asc";
+type SortKey =
+  | "nombre"
+  | "tostador"
+  | "pais"
+  | "region"
+  | "varietal"
+  | "proceso"
+  | "fecha"
+  | "puntuacion";
+type SortDir = "asc" | "desc";
 
-const SORT_OPTIONS: { value: SortOption; label: string }[] = [
-  { value: "fecha-desc", label: "Fecha (más reciente primero)" },
-  { value: "fecha-asc", label: "Fecha (más antiguo primero)" },
-  { value: "nombre-asc", label: "Nombre (A-Z)" },
-  { value: "nombre-desc", label: "Nombre (Z-A)" },
-  { value: "tostador-asc", label: "Tostador (A-Z)" },
-  { value: "tostador-desc", label: "Tostador (Z-A)" },
-  { value: "pais-asc", label: "País (A-Z)" },
-  { value: "pais-desc", label: "País (Z-A)" },
-  { value: "puntuacion-desc", label: "Puntuación (mayor a menor)" },
-  { value: "puntuacion-asc", label: "Puntuación (menor a mayor)" },
+type FilterKey =
+  | "tostador"
+  | "pais"
+  | "region"
+  | "varietal"
+  | "proceso"
+  | "puntuacionMin";
+type Filters = Record<FilterKey, string>;
+
+const emptyFilters: Filters = {
+  tostador: "",
+  pais: "",
+  region: "",
+  varietal: "",
+  proceso: "",
+  puntuacionMin: "",
+};
+
+const COLUMNS: { key: SortKey; label: string; filter?: FilterKey }[] = [
+  { key: "nombre", label: "Nombre" },
+  { key: "tostador", label: "Tostador", filter: "tostador" },
+  { key: "pais", label: "País", filter: "pais" },
+  { key: "region", label: "Región", filter: "region" },
+  { key: "varietal", label: "Varietal", filter: "varietal" },
+  { key: "proceso", label: "Proceso", filter: "proceso" },
+  { key: "fecha", label: "Fecha" },
+  { key: "puntuacion", label: "Puntuación", filter: "puntuacionMin" },
 ];
 
-function sortCoffees(coffees: Coffee[], sort: SortOption): Coffee[] {
-  const sorted = [...coffees];
+function uniqueSorted(values: (string | null)[]): string[] {
+  return Array.from(new Set(values.filter((v): v is string => Boolean(v)))).sort(
+    (a, b) => a.localeCompare(b, "es")
+  );
+}
 
-  function byPuntuacion(a: Coffee, b: Coffee, ascending: boolean) {
-    if (a.puntuacion === null) return 1;
-    if (b.puntuacion === null) return -1;
-    return ascending ? a.puntuacion - b.puntuacion : b.puntuacion - a.puntuacion;
+function compareCoffees(a: Coffee, b: Coffee, key: SortKey, dir: SortDir) {
+  const av = a[key];
+  const bv = b[key];
+  const aEmpty = av === null || av === "";
+  const bEmpty = bv === null || bv === "";
+
+  // Los valores vacíos van siempre al final, sea cual sea el sentido.
+  if (aEmpty !== bEmpty) return aEmpty ? 1 : -1;
+
+  if (!aEmpty) {
+    const result =
+      typeof av === "number" && typeof bv === "number"
+        ? av - bv
+        : String(av).localeCompare(String(bv), "es");
+    if (result !== 0) return dir === "asc" ? result : -result;
   }
 
-  switch (sort) {
-    case "fecha-desc":
-      sorted.sort((a, b) => b.fecha.localeCompare(a.fecha));
-      break;
-    case "fecha-asc":
-      sorted.sort((a, b) => a.fecha.localeCompare(b.fecha));
-      break;
-    case "nombre-asc":
-      sorted.sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
-      break;
-    case "nombre-desc":
-      sorted.sort((a, b) => b.nombre.localeCompare(a.nombre, "es"));
-      break;
-    case "tostador-asc":
-      sorted.sort((a, b) => a.tostador.localeCompare(b.tostador, "es"));
-      break;
-    case "tostador-desc":
-      sorted.sort((a, b) => b.tostador.localeCompare(a.tostador, "es"));
-      break;
-    case "pais-asc":
-      sorted.sort((a, b) => a.pais.localeCompare(b.pais, "es"));
-      break;
-    case "pais-desc":
-      sorted.sort((a, b) => b.pais.localeCompare(a.pais, "es"));
-      break;
-    case "puntuacion-desc":
-      sorted.sort((a, b) => byPuntuacion(a, b, false));
-      break;
-    case "puntuacion-asc":
-      sorted.sort((a, b) => byPuntuacion(a, b, true));
-      break;
-  }
-
-  return sorted;
+  return b.fecha.localeCompare(a.fecha) || b.created_at.localeCompare(a.created_at);
 }
 
 export default function HistoricoList({ coffees }: { coffees: Coffee[] }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
-  const [sort, setSort] = useState<SortOption>("fecha-desc");
+  const [filters, setFilters] = useState<Filters>(emptyFilters);
+  const [sortKey, setSortKey] = useState<SortKey>("fecha");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [isPending, startTransition] = useTransition();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return coffees;
-    return coffees.filter((c) =>
-      [c.nombre, c.tostador, c.pais, c.region, c.varietal, c.proceso]
-        .filter(Boolean)
-        .some((field) => field!.toLowerCase().includes(q))
-    );
-  }, [coffees, query]);
+  const options = useMemo(
+    (): Record<Exclude<FilterKey, "puntuacionMin">, string[]> => ({
+      tostador: uniqueSorted(coffees.map((c) => c.tostador)),
+      pais: uniqueSorted(coffees.map((c) => c.pais)),
+      region: uniqueSorted(coffees.map((c) => c.region)),
+      varietal: uniqueSorted(coffees.map((c) => c.varietal)),
+      proceso: uniqueSorted(coffees.map((c) => c.proceso)),
+    }),
+    [coffees]
+  );
 
-  const sorted = useMemo(() => sortCoffees(filtered, sort), [filtered, sort]);
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return coffees
+      .filter((c) => {
+        if (filters.tostador && c.tostador !== filters.tostador) return false;
+        if (filters.pais && c.pais !== filters.pais) return false;
+        if (filters.region && c.region !== filters.region) return false;
+        if (filters.varietal && c.varietal !== filters.varietal) return false;
+        if (filters.proceso && c.proceso !== filters.proceso) return false;
+        if (
+          filters.puntuacionMin &&
+          (c.puntuacion === null || c.puntuacion < Number(filters.puntuacionMin))
+        )
+          return false;
+        if (!q) return true;
+        return [c.nombre, c.tostador, c.pais, c.region, c.varietal, c.proceso]
+          .filter(Boolean)
+          .some((field) => field!.toLowerCase().includes(q));
+      })
+      .sort((a, b) => compareCoffees(a, b, sortKey, sortDir));
+  }, [coffees, query, filters, sortKey, sortDir]);
+
+  const hasActiveFilters = Object.values(filters).some(Boolean) || query !== "";
+
+  function toggleSort(key: SortKey) {
+    if (key === sortKey) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir(key === "fecha" || key === "puntuacion" ? "desc" : "asc");
+    }
+  }
+
+  function clearFilters() {
+    setFilters(emptyFilters);
+    setQuery("");
+  }
 
   function handleDelete(id: string, nombre: string) {
     if (!confirm(`¿Borrar "${nombre}" del histórico?`)) return;
@@ -115,91 +150,208 @@ export default function HistoricoList({ coffees }: { coffees: Coffee[] }) {
 
   return (
     <div>
-      <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
+      <div className="flex items-center justify-between gap-4 mb-2 flex-wrap">
         <h1
           className="text-2xl text-coffee-dark"
           style={{ fontFamily: "var(--font-serif)" }}
         >
           Histórico de cafés
         </h1>
-        <div className="flex items-center gap-3 flex-wrap">
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar por nombre, tostador, país…"
-            className="input max-w-xs"
-          />
-          <label className="flex items-center gap-2 text-sm text-coffee-dark">
-            Ordenar por
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value as SortOption)}
-              className="input py-1.5 text-sm w-auto"
-            >
-              {SORT_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Buscar por nombre, tostador, país…"
+          className="input max-w-xs"
+        />
       </div>
 
-      {sorted.length === 0 ? (
-        <EmptyState message="Ningún café coincide con tu búsqueda." />
-      ) : (
-        <ul className="space-y-3">
-          {sorted.map((c) =>
-            editingId === c.id ? (
-              <EditCoffeeForm
-                key={c.id}
-                coffee={c}
-                onCancel={() => setEditingId(null)}
-                onSaved={() => {
-                  setEditingId(null);
-                  router.refresh();
-                }}
-              />
+      <div className="flex items-center gap-3 mb-4 text-sm text-coffee/70 min-h-6">
+        <span>
+          {visible.length} de {coffees.length} cafés
+        </span>
+        {hasActiveFilters && (
+          <button
+            onClick={clearFilters}
+            className="text-caramel hover:text-coffee-dark underline"
+          >
+            Limpiar filtros
+          </button>
+        )}
+      </div>
+
+      <div className="bg-white/60 border border-latte/50 rounded-xl shadow-sm overflow-x-auto">
+        <table className="w-full min-w-[900px] text-sm">
+          <thead className="bg-cream-dark/60 text-coffee-dark">
+            <tr>
+              {COLUMNS.map((col) => {
+                const active = sortKey === col.key;
+                return (
+                  <th
+                    key={col.key}
+                    scope="col"
+                    aria-sort={
+                      active
+                        ? sortDir === "asc"
+                          ? "ascending"
+                          : "descending"
+                        : "none"
+                    }
+                    className="px-3 pt-3 pb-1 text-left font-semibold whitespace-nowrap"
+                  >
+                    <button
+                      onClick={() => toggleSort(col.key)}
+                      className="inline-flex items-center gap-1 hover:text-caramel transition-colors"
+                    >
+                      {col.label}
+                      <span
+                        className={active ? "text-caramel" : "text-coffee/30"}
+                        aria-hidden="true"
+                      >
+                        {active ? (sortDir === "asc" ? "▲" : "▼") : "↕"}
+                      </span>
+                    </button>
+                  </th>
+                );
+              })}
+              <th className="px-3 pt-3 pb-1" />
+            </tr>
+            <tr>
+              {COLUMNS.map((col) => (
+                <th key={col.key} className="px-3 pb-3 pt-0 font-normal">
+                  {col.filter === "puntuacionMin" ? (
+                    <FilterSelect
+                      label="Puntuación mínima"
+                      value={filters.puntuacionMin}
+                      onChange={(v) =>
+                        setFilters((f) => ({ ...f, puntuacionMin: v }))
+                      }
+                      options={["1", "2", "3", "4", "5"]}
+                      formatOption={(v) => `≥ ${v} ★`}
+                    />
+                  ) : col.filter ? (
+                    <FilterSelect
+                      label={`Filtrar por ${col.label.toLowerCase()}`}
+                      value={filters[col.filter]}
+                      onChange={(v) =>
+                        setFilters((f) => ({ ...f, [col.filter!]: v }))
+                      }
+                      options={options[col.filter]}
+                    />
+                  ) : null}
+                </th>
+              ))}
+              <th className="px-3 pb-3 pt-0" />
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-latte/40">
+            {visible.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={COLUMNS.length + 1}
+                  className="text-center py-12 text-coffee/60"
+                >
+                  Ningún café coincide con los filtros seleccionados.
+                </td>
+              </tr>
             ) : (
-              <li
-                key={c.id}
-                className="bg-white/60 border border-latte/50 rounded-xl px-5 py-4 flex flex-wrap items-center gap-x-6 gap-y-2 shadow-sm"
-              >
-                <div className="flex-1 min-w-[200px]">
-                  <p className="font-semibold text-coffee-dark">{c.nombre}</p>
-                  <p className="text-sm text-coffee/70">
-                    {c.tostador} · {c.pais}
-                    {c.region ? ` (${c.region})` : ""}
-                    {c.varietal ? ` · ${c.varietal}` : ""}
-                    {c.proceso ? ` · ${c.proceso}` : ""}
-                  </p>
-                </div>
-                <div className="text-sm text-coffee/70 w-28">
-                  {formatDate(c.fecha)}
-                </div>
-                <StarDisplay value={c.puntuacion} />
-                <button
-                  onClick={() => setEditingId(c.id)}
-                  className="text-sm text-caramel hover:text-coffee-dark transition-colors"
-                  aria-label={`Editar ${c.nombre}`}
-                >
-                  Editar
-                </button>
-                <button
-                  onClick={() => handleDelete(c.id, c.nombre)}
-                  disabled={isPending && deletingId === c.id}
-                  className="text-sm text-red-700/70 hover:text-red-700 disabled:opacity-40 transition-colors"
-                  aria-label={`Borrar ${c.nombre}`}
-                >
-                  {isPending && deletingId === c.id ? "Borrando…" : "Borrar"}
-                </button>
-              </li>
-            )
-          )}
-        </ul>
-      )}
+              visible.map((c) =>
+                editingId === c.id ? (
+                  <tr key={c.id}>
+                    <td colSpan={COLUMNS.length + 1} className="p-0">
+                      <EditCoffeeForm
+                        coffee={c}
+                        onCancel={() => setEditingId(null)}
+                        onSaved={() => {
+                          setEditingId(null);
+                          router.refresh();
+                        }}
+                      />
+                    </td>
+                  </tr>
+                ) : (
+                  <tr
+                    key={c.id}
+                    className="hover:bg-cream-dark/30 transition-colors"
+                  >
+                    <td className="px-3 py-2 font-semibold text-coffee-dark">
+                      {c.nombre}
+                    </td>
+                    <td className="px-3 py-2">{c.tostador}</td>
+                    <td className="px-3 py-2">{c.pais}</td>
+                    <Optional value={c.region} />
+                    <Optional value={c.varietal} />
+                    <Optional value={c.proceso} />
+                    <td className="px-3 py-2 whitespace-nowrap text-coffee/70">
+                      {formatDate(c.fecha)}
+                    </td>
+                    <td className="px-3 py-2 whitespace-nowrap">
+                      <StarDisplay value={c.puntuacion} />
+                    </td>
+                    <td className="px-3 py-2 whitespace-nowrap text-right space-x-3">
+                      <button
+                        onClick={() => setEditingId(c.id)}
+                        className="text-caramel hover:text-coffee-dark transition-colors"
+                        aria-label={`Editar ${c.nombre}`}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => handleDelete(c.id, c.nombre)}
+                        disabled={isPending && deletingId === c.id}
+                        className="text-red-700/70 hover:text-red-700 disabled:opacity-40 transition-colors"
+                        aria-label={`Borrar ${c.nombre}`}
+                      >
+                        {isPending && deletingId === c.id
+                          ? "Borrando…"
+                          : "Borrar"}
+                      </button>
+                    </td>
+                  </tr>
+                )
+              )
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
+  );
+}
+
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  options,
+  formatOption,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+  formatOption?: (v: string) => string;
+}) {
+  return (
+    <select
+      aria-label={label}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="input py-1 px-2 text-xs w-full min-w-[5.5rem] max-w-[10rem]"
+    >
+      <option value="">Todos</option>
+      {options.map((opt) => (
+        <option key={opt} value={opt}>
+          {formatOption ? formatOption(opt) : opt}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+function Optional({ value }: { value: string | null }) {
+  return (
+    <td className="px-3 py-2">
+      {value ? value : <span className="text-coffee/30">—</span>}
+    </td>
   );
 }
 

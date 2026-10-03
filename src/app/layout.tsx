@@ -27,7 +27,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col bg-cream text-espresso">
         <Navbar />
-        <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-8">
           {children}
         </main>
         <footer className="text-center text-xs text-coffee/60 py-6">

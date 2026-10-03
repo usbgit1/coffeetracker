@@ -194,7 +194,7 @@ function FiltersBar({
   }
 
   return (
-    <div className="bg-white/60 border border-latte/50 rounded-xl p-4 flex flex-wrap gap-3 items-end">
+    <div className="bg-white/60 border border-latte/50 rounded-xl p-3 flex flex-nowrap gap-2 items-end">
       <Select
         label="Tostador"
         value={filters.tostador}
@@ -232,7 +232,7 @@ function FiltersBar({
         options={["1", "2", "3", "4", "5"]}
         formatOption={(v) => `${v} ★`}
       />
-      <label className="block">
+      <label className="block min-w-0 flex-1">
         <span className="block text-xs font-medium text-coffee-dark mb-1">
           Desde
         </span>
@@ -240,10 +240,10 @@ function FiltersBar({
           type="date"
           value={filters.desde}
           onChange={(e) => update("desde", e.target.value)}
-          className="input py-1.5 text-sm"
+          className="input py-1.5 px-2 text-xs w-full"
         />
       </label>
-      <label className="block">
+      <label className="block min-w-0 flex-1">
         <span className="block text-xs font-medium text-coffee-dark mb-1">
           Hasta
         </span>
@@ -251,7 +251,7 @@ function FiltersBar({
           type="date"
           value={filters.hasta}
           onChange={(e) => update("hasta", e.target.value)}
-          className="input py-1.5 text-sm"
+          className="input py-1.5 px-2 text-xs w-full"
         />
       </label>
       {(filters.tostador ||
@@ -264,7 +264,7 @@ function FiltersBar({
         filters.hasta) && (
         <button
           onClick={() => setFilters(emptyFilters)}
-          className="text-sm text-caramel hover:text-coffee-dark underline"
+          className="text-xs text-caramel hover:text-coffee-dark underline whitespace-nowrap pb-2"
         >
           Limpiar filtros
         </button>
@@ -287,14 +287,14 @@ function Select({
   formatOption?: (v: string) => string;
 }) {
   return (
-    <label className="block">
-      <span className="block text-xs font-medium text-coffee-dark mb-1">
+    <label className="block min-w-0 flex-1">
+      <span className="block text-xs font-medium text-coffee-dark mb-1 truncate">
         {label}
       </span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="input py-1.5 text-sm min-w-[9rem]"
+        className="input py-1.5 px-2 text-xs w-full"
       >
         <option value="">Todos</option>
         {options.map((opt) => (

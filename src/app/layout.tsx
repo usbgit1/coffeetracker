@@ -30,9 +30,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-8">
           {children}
         </main>
-        <footer className="text-center text-xs text-coffee/60 py-6">
-          Coffee Tracker — registro personal
-        </footer>
       </body>
     </html>
   );

@@ -27,7 +27,7 @@ App personal (una sola persona, sin login) para registrar los cafés que compra 
 - `updateCoffee` hace `.select()` y trata 0 filas como error: sin política UPDATE, Supabase devuelve "éxito" sin cambiar nada.
 - Histórico (`HistoricoList.tsx`): tabla con orden por clic en encabezado y filtros desplegables bajo el encabezado, todo en cliente. Editar abre `EditCoffeeForm` dentro de la tabla.
 - Dashboard: se quitaron a petición del usuario la tarjeta de puntuación media y los gráficos "por mes" y "distribución de puntuaciones". No volver a añadirlos.
-- Navegación en este orden: Dashboard (`/dashboard`), Registrar (`/`), Histórico (`/historico`).
+- Navegación en este orden: Dashboard (`/dashboard`), Registrar (`/registrar`), Histórico (`/historico`). La raíz `/` redirige a `/dashboard`. Sin footer. Los filtros del Dashboard van en una sola línea (`flex-nowrap`).
 
 ## Diseño
 - Paleta café en `src/app/globals.css` (`cream`, `latte`, `caramel`, `coffee`, `coffee-dark`, `espresso`, `gold`); fuentes Inter + Fraunces (títulos).

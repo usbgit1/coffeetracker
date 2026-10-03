@@ -1,5 +1,5 @@
-import CoffeeForm from "@/components/CoffeeForm";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return <CoffeeForm />;
+  redirect("/dashboard");
 }

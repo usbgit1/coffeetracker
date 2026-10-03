@@ -6,7 +6,7 @@ import CoffeeBeanIcon from "@/components/icons/CoffeeBeanIcon";
 
 const links = [
   { href: "/dashboard", label: "Dashboard" },
-  { href: "/", label: "Registrar" },
+  { href: "/registrar", label: "Registrar" },
   { href: "/historico", label: "Histórico" },
 ];
 
